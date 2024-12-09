@@ -4,7 +4,6 @@ using UnityEngine;
 
 public interface IInteractor
 {
-    string Name { get; }
-    void Interact(GameObject obj);
+    void Interact(Interactable interactableObj);
     GameObject GetGameObject();
 }

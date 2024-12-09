@@ -71,6 +71,15 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""DropWeapon"",
+                    ""type"": ""Value"",
+                    ""id"": ""c9ad6914-b936-407a-baaf-b66782076462"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -238,6 +247,17 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
                     ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c9096339-2a24-42e1-aad0-d54be3c62bfa"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DropWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -251,6 +271,7 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
         m_Floor_Shoot = m_Floor.FindAction("Shoot", throwIfNotFound: true);
         m_Floor_PickUp = m_Floor.FindAction("PickUp", throwIfNotFound: true);
         m_Floor_Interact = m_Floor.FindAction("Interact", throwIfNotFound: true);
+        m_Floor_DropWeapon = m_Floor.FindAction("DropWeapon", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -317,6 +338,7 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
     private readonly InputAction m_Floor_Shoot;
     private readonly InputAction m_Floor_PickUp;
     private readonly InputAction m_Floor_Interact;
+    private readonly InputAction m_Floor_DropWeapon;
     public struct FloorActions
     {
         private @InputSystem m_Wrapper;
@@ -326,6 +348,7 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
         public InputAction @Shoot => m_Wrapper.m_Floor_Shoot;
         public InputAction @PickUp => m_Wrapper.m_Floor_PickUp;
         public InputAction @Interact => m_Wrapper.m_Floor_Interact;
+        public InputAction @DropWeapon => m_Wrapper.m_Floor_DropWeapon;
         public InputActionMap Get() { return m_Wrapper.m_Floor; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -350,6 +373,9 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
             @Interact.started += instance.OnInteract;
             @Interact.performed += instance.OnInteract;
             @Interact.canceled += instance.OnInteract;
+            @DropWeapon.started += instance.OnDropWeapon;
+            @DropWeapon.performed += instance.OnDropWeapon;
+            @DropWeapon.canceled += instance.OnDropWeapon;
         }
 
         private void UnregisterCallbacks(IFloorActions instance)
@@ -369,6 +395,9 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
             @Interact.started -= instance.OnInteract;
             @Interact.performed -= instance.OnInteract;
             @Interact.canceled -= instance.OnInteract;
+            @DropWeapon.started -= instance.OnDropWeapon;
+            @DropWeapon.performed -= instance.OnDropWeapon;
+            @DropWeapon.canceled -= instance.OnDropWeapon;
         }
 
         public void RemoveCallbacks(IFloorActions instance)
@@ -393,5 +422,6 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
         void OnShoot(InputAction.CallbackContext context);
         void OnPickUp(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
+        void OnDropWeapon(InputAction.CallbackContext context);
     }
 }

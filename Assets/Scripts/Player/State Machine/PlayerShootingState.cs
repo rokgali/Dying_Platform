@@ -15,6 +15,11 @@ public class PlayerShootingState : PlayerState
     public override void EnterState()
     {
         base.EnterState();
+
+        if (player.FiringDirection != Vector3.zero)
+        {
+            Debug.Log("Firing in " + player.FiringDirection);
+        }
     }
 
     public override void ExitState()
@@ -25,11 +30,6 @@ public class PlayerShootingState : PlayerState
     public override void FrameUpdate()
     {
         base.FrameUpdate();
-
-        if(player.FiringDirection != Vector3.zero)
-        {
-            Debug.Log("Firing in " + player.FiringDirection);
-        }
     }
 
     public override void PhysicsUpdate()

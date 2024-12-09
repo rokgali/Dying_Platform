@@ -13,8 +13,6 @@ public class WizardStaff : RangedWeapon
     [field: SerializeField] public override int MaxAmmo { get; }
 
     [field:SerializeField] public override int Damage { get; }
-    protected override WeaponUser WeaponUser { get; set; }
-
     public override void OnDrop()
     {
         base.OnDrop();

@@ -4,22 +4,25 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject platformPrefab;
-    private GameObject currentObject;
-    private Floor floor;
-    [SerializeField]
-    private PlayerController player;
-    private float raycastDistance = 1.5f;
-
-    // Start is called before the first frame update
+    public static GameManager Instance;
+    [SerializeField] private Player player;
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
     void Start()
     {
-        // FloorGenerator platformGenerator = new FloorGenerator(platformPrefab);
-        // floor = platformGenerator.CreateRectangleFloor(new Vector3(-15, 0, -15), 30, 30);
+        player = Instantiate(player);
     }
-
-    private void Update()
+    public Vector3 GetPlayerPosition()
     {
+        return player.transform.position;
     }
 }

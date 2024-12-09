@@ -2,34 +2,61 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Weapon: IInteractable
+public abstract class Weapon: Interactable
 {
-    protected abstract WeaponUser WeaponUser { get; set; }
     protected string WeaponName;
     public abstract int Damage { get; }
     public abstract void Use();
     public abstract void UseSpecial();
-    public void OnInteraction(IInteractor interactor)
+    private string _message = "Press E to pick up weapon";
+    public override void OnInteraction(IInteractor interactor)
     {
-        WeaponUser foundWeaponUser = interactor.GetGameObject().GetComponent<WeaponUser>();
-
-        if (foundWeaponUser != null)
+        if(interactor is WeaponUser && PlayerIsInRangeForTooltipDisplay)
         {
-            WeaponUser = foundWeaponUser;
-            WeaponUser.Weapons.Add(this);
+            WeaponUser weaponUser = (WeaponUser)interactor;
 
-            Debug.Log($"Player picked up ${WeaponName}");
-        }
-        else
-        {
-            Debug.Log("This guy is not a weapon user, THEREFORE HE'S NOT ALLOWED to wield this weapon");
+            weaponUser.PickUpWeapon(this);
+            TooltipManager.Instance.HideToolTip();
         }
     }
     public virtual void OnDrop()
     {
-        WeaponUser.Weapons.Remove(this);
-        WeaponUser = null;
-
         Debug.Log($"Player dropped ${WeaponName}");
+        this.gameObject.SetActive(true);
+        this.gameObject.transform.position = GameManager.Instance.GetPlayerPosition();
+    }
+
+    public override void OnMouseEnter()
+    {
+        base.OnMouseEnter();
+
+        if (PlayerIsInRangeForTooltipDisplay)
+        {
+            TooltipManager.Instance.SetAndShowTooltip(_message);
+        }
+    }
+
+    public override void OnMouseOver()
+    {
+        base.OnMouseOver();
+
+        if(PlayerIsInRangeForTooltipDisplay)
+        {
+            TooltipManager.Instance.SetAndShowTooltip(_message);
+        }
+        else
+        {
+            TooltipManager.Instance.HideToolTip();
+        }
+    }
+
+    public override void OnMouseExit()
+    {
+        TooltipManager.Instance.HideToolTip();
+    }
+
+    public void HideWeapon()
+    {
+        gameObject.SetActive(false);
     }
 }

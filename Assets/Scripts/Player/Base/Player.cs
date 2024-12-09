@@ -17,7 +17,7 @@ public class Player : WeaponUser, IDamageable, IPlayerMoveable, IPicker, IPlayer
 
     [SerializeField] float Height;
     [SerializeField] float Drag;
-    [field: SerializeField] public Camera Camera { get; set; }
+    public Camera Camera { get; set; }
     [field: SerializeField] public float Strength { get; private set; }
 
     #region State Machine Variables
@@ -57,9 +57,9 @@ public class Player : WeaponUser, IDamageable, IPlayerMoveable, IPicker, IPlayer
 
     #endregion
     #region Combat
-    public WeaponMachine WeaponMachine { get; private set; }
+    public override WeaponMachine WeaponMachine { get; set; }
     public Vector3 FiringDirection { get; private set; }
-    public override List<Weapon> Weapons { get; }
+    public override List<Weapon> Weapons { get; } = new();
 
     #endregion
 
@@ -91,6 +91,7 @@ public class Player : WeaponUser, IDamageable, IPlayerMoveable, IPicker, IPlayer
         _playerInputActions.Floor.Interact.performed += OnInteract;
 
         _playerInputActions.Floor.Jump.performed += OnJump;
+        _playerInputActions.Floor.DropWeapon.performed += (ctx) => DropWeapon();
 
         _playerInputActions.Floor.Enable();
     }
@@ -108,6 +109,8 @@ public class Player : WeaponUser, IDamageable, IPlayerMoveable, IPicker, IPlayer
 
         _playerInputActions.Floor.Interact.performed -= OnInteract;
 
+        _playerInputActions.Floor.DropWeapon.performed -= (ctx) => DropWeapon();
+
         _playerInputActions.Disable();
     }
 
@@ -121,6 +124,8 @@ public class Player : WeaponUser, IDamageable, IPlayerMoveable, IPicker, IPlayer
 
         _previousSelectedGameObject = new();
         PickedUpObjects = new();
+
+        Camera = GetComponentInChildren<Camera>();
     }
 
     private void Update()
@@ -311,12 +316,36 @@ public class Player : WeaponUser, IDamageable, IPlayerMoveable, IPicker, IPlayer
 
     public override void PickUpWeapon(Weapon weapon)
     {
-        base.PickUpWeapon(weapon);
+        if (Weapons.Count >= 2)
+            return;
+
+        if (Physics.Raycast(Camera.ScreenPointToRay(Input.mousePosition), out var hit))
+        {
+            Debug.DrawRay(transform.position, Input.mousePosition * hit.distance, Color.red);
+            if (hit.transform.gameObject.GetComponent<Weapon>() != null)
+            {
+                Debug.Log("Weapon added to pocket");
+                Weapons.Add(weapon);
+                WeaponMachine.ChangeWeapon(weapon);
+                weapon.HideWeapon();
+            }
+            else
+            {
+                Debug.Log("Dis not wepon");
+            }
+        }
     }
 
-    public override void DropWeapon(Weapon weapon)
+    public override void DropWeapon()
     {
-        base.DropWeapon(weapon);
+        Debug.Log("Weapon count: " + Weapons.Count);
+        if(Weapons.Count > 1)
+        {
+            int weaponIndexToSwitchTo = Weapons.Count - 1;
+            WeaponMachine.ChangeWeapon(Weapons[weaponIndexToSwitchTo]);
+        }
+
+        base.DropWeapon();
     }
 
     #endregion
@@ -325,14 +354,24 @@ public class Player : WeaponUser, IDamageable, IPlayerMoveable, IPicker, IPlayer
 
     public void OnInteract(InputAction.CallbackContext ctx)
     {
-        GameObject interactableGameObject = new();
+        Ray ray = Camera.ScreenPointToRay(Input.mousePosition);
 
-        Interact(interactableGameObject);
+        if(Physics.Raycast(ray, out var hit))
+        {
+            Interactable interatableObject = hit.transform.gameObject.GetComponent<Interactable>();
+
+            if(interatableObject == null)
+            {
+                return;
+            }
+
+            Interact(interatableObject);
+        }
     }
 
-    public void Interact(GameObject obj)
+    public void Interact(Interactable interactableObj)
     {
-        Debug.Log("Interacting with thingy! ");
+        interactableObj.OnInteraction(this);
     }
 
     #endregion
